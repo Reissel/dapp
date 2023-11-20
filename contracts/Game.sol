@@ -45,6 +45,10 @@ contract Game {
         return players[myAddress];
     }
 
+    function getPlayerList() public view returns(address[] memory) {
+        return playerList;
+    }
+
     function getPlayerListLength() public view returns (uint256) {
         return playerList.length;
     }
