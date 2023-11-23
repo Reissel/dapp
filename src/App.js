@@ -24,6 +24,17 @@ function App() {
     await window.ethereum.request({ method: "eth_requestAccounts" });
   }
 
+  async function updateStageAndTurnIndex(contract) {
+    try {
+      const gameStage = (await contract.gameStage()).toString();
+      const turnIndex = (await contract.turnIndex()).toString();
+      setStage(gameStage);
+      setTurnIndex(turnIndex);
+    } catch (error) {
+      console.log('Error while updating stage and turnIndex ', error);
+    }
+  }
+
   async function fetchGameStage() {
     if (typeof window.ethereum !== 'undefined') {
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -34,7 +45,6 @@ function App() {
         const turnIndex = (await contract.turnIndex()).toString();
         
         console.log('Stage: ', gameStage);
-        console.log('Player List Length: ', playerListLength);
         console.log('Turn Index: ', turnIndex);
         setStage(gameStage);
         setTurnIndex(turnIndex);
@@ -71,19 +81,6 @@ function App() {
     }
   }
 
-  async function fetchPlayerInfo() {
-    if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(gameAddress, Game.abi, provider);
-    }
-
-    try {
-
-    } catch (erro) {
-      console.log('Error while trying to fetch players info!');
-    }
-  }
-
   async function createEnemy() {
 
     if (typeof window.ethereum !== 'undefined') {
@@ -102,6 +99,8 @@ function App() {
 
       setHealthpoints('');
       setDamage('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -120,6 +119,8 @@ function App() {
         console.log('Error: ', error);
       }
       setClassInput('')
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -138,6 +139,8 @@ function App() {
         console.log('Error: ', error);
       }
       setPlayerPublicKey('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -155,6 +158,8 @@ function App() {
         console.log('Error: ', error);
       }
       setPlayerPublicKey('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -173,6 +178,8 @@ function App() {
         console.log('Error: ', error);
       }
       setPlayerPublicKey('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -335,6 +342,13 @@ function App() {
               </pre>
             </div>
           </div>
+
+          <label>
+            <span>Enemy Status:</span><br />
+            <span>Health: {enemyHealth}</span><br />
+            <span>Damage: {enemyDamage}</span><br />
+          </label>
+
           <label>
           Value 1:
           <input type="text" value={playerPublicKey} onChange={handleValue4Change} placeholder="Player Public Key" />
