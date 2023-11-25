@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Game from "./artifacts/contracts/Game.sol/Game.json";
 
-const gameAddress = "0x4D2F77c5E8e973024Ae31869156DB57801d63F24";
+const gameAddress = "{contract_deploy_address}";
 
 function App() {
 
@@ -24,6 +24,17 @@ function App() {
     await window.ethereum.request({ method: "eth_requestAccounts" });
   }
 
+  async function updateStageAndTurnIndex(contract) {
+    try {
+      const gameStage = (await contract.gameStage()).toString();
+      const turnIndex = (await contract.turnIndex()).toString();
+      setStage(gameStage);
+      setTurnIndex(turnIndex);
+    } catch (error) {
+      console.log('Error while updating stage and turnIndex ', error);
+    }
+  }
+
   async function fetchGameStage() {
     if (typeof window.ethereum !== 'undefined') {
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -34,22 +45,19 @@ function App() {
         const turnIndex = (await contract.turnIndex()).toString();
         
         console.log('Stage: ', gameStage);
-        console.log('Player List Length: ', playerListLength);
         console.log('Turn Index: ', turnIndex);
         setStage(gameStage);
         setTurnIndex(turnIndex);
-        /*
+        
         if(gameStage == 2) {
-          
-          const players = (await contract.playerList());
-          await players.forEach(async key => {
+
+          const players = await contract.getPlayerList();
+          for(const key of players) {
             const player = (await contract.getPlayer(key));
-            const playerTurn = player.turnTime;
+            const playerTurn = parseInt(player.turnTime);
             switch(playerTurn) {
               case 1:
-                console.log("Setting player1");
                 setPlayer1(player);
-                console.log("Done setting player1");
                 break;
               case 2:
                 setPlayer2(player);
@@ -59,13 +67,14 @@ function App() {
                 break;
               default:
                 console.log("No player!");
+                break;
             }
-          });
-          const enemyStats = (await contract.enemy()).toString();
-          setEnemyHealth(enemyStats.healthpoints);
-          setEnemyDamage(enemyStats.damage);
+          }
+          const enemyStats = await contract.enemy();
+          setEnemyHealth(parseInt(enemyStats.healthPoints));
+          setEnemyDamage(parseInt(enemyStats.damage));
         }
-        */
+        
       } catch (error) {
         console.log('Error: ', error);
       }
@@ -90,6 +99,8 @@ function App() {
 
       setHealthpoints('');
       setDamage('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -107,9 +118,9 @@ function App() {
       } catch (error) {
         console.log('Error: ', error);
       }
+      setClassInput('')
 
-      setHealthpoints('');
-      setDamage('');
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -128,6 +139,8 @@ function App() {
         console.log('Error: ', error);
       }
       setPlayerPublicKey('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -145,6 +158,8 @@ function App() {
         console.log('Error: ', error);
       }
       setPlayerPublicKey('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -163,6 +178,8 @@ function App() {
         console.log('Error: ', error);
       }
       setPlayerPublicKey('');
+
+      await updateStageAndTurnIndex(contract);
     }
   }
 
@@ -185,7 +202,7 @@ function App() {
   useEffect(() => {
     // Fetch contract status when the component mounts
     fetchGameStage();
-  });
+  }, [stage, turnIndex]);
 
   return (
     
@@ -274,12 +291,64 @@ function App() {
 
       </div>
       }
-      { stage == 2 && turnIndex == 0 &&
+      { stage == 2 && turnIndex == 0 && player1 && player2 && player3 &&
         //Enemy turn to act
         <div>
           <h2>
             Enemy Turn
           </h2>
+          <div className='characters-classes'>
+            <div className='warrior'>
+              <pre>
+              {`
+              Player 1
+              Class = ${player1.character.class == 0 ? 'Warrior' : player1.character.class == 1 ? 'Healer' : 'Archer'}
+              healthPoints = ${player1.character.healthPoints};
+              energy = ${player1.character.energy};
+              damage = ${player1.character.damage};
+              strength = ${player1.character.strength};
+              wisdom = ${player1.character.wisdom};
+              agility = ${player1.character.agility};
+              `}
+              </pre>
+              
+            </div>
+            <div className='healer'>
+              <pre>
+                {`
+                Player 2
+                Class = ${player2.character.class == 0 ? 'Warrior' : player1.character.class == 1 ? 'Healer' : 'Archer'}
+                healthPoints = ${player2.character.healthPoints};
+                energy = ${player2.character.energy};
+                damage = ${player2.character.damage};
+                strength = ${player2.character.strength};
+                wisdom = ${player2.character.wisdom};
+                agility = ${player2.character.agility};
+                `}
+              </pre>
+            </div>
+            <div className='archer'>
+              <pre>
+                {`
+                Player 3
+                Class = ${player3.character.class == 0 ? 'Warrior' : player1.character.class == 1 ? 'Healer' : 'Archer'}
+                healthPoints = ${player3.character.healthPoints};
+                energy = ${player3.character.energy};
+                damage = ${player3.character.damage};
+                strength = ${player3.character.strength};
+                wisdom = ${player3.character.wisdom};
+                agility = ${player3.character.agility};
+                `}
+              </pre>
+            </div>
+          </div>
+
+          <label>
+            <span>Enemy Status:</span><br />
+            <span>Health: {enemyHealth}</span><br />
+            <span>Damage: {enemyDamage}</span><br />
+          </label>
+
           <label>
           Value 1:
           <input type="text" value={playerPublicKey} onChange={handleValue4Change} placeholder="Player Public Key" />
@@ -290,18 +359,62 @@ function App() {
           <button onClick={attackPlayer}>Confirm Target</button>
 
         </div>
-
       }
-      { stage == 2 && turnIndex != 0 &&
+      { stage == 2 && turnIndex != 0 && player1 && player2 && player3 &&
         //Players turn to act
         <div>
           <h2>
-            Players Turn
+            Player {turnIndex} Turn
           </h2>
+          <div className='characters-classes'>
+            <div className='warrior'>
+              <pre>
+              {`
+              Player 1
+              Class = ${player1.character.class == 0 ? 'Warrior' : player1.character.class == 1 ? 'Healer' : 'Archer'}
+              healthPoints = ${player1.character.healthPoints};
+              energy = ${player1.character.energy};
+              damage = ${player1.character.damage};
+              strength = ${player1.character.strength};
+              wisdom = ${player1.character.wisdom};
+              agility = ${player1.character.agility};
+              `}
+              </pre>
+              
+            </div>
+            <div className='healer'>
+              <pre>
+                {`
+                Player 2
+                Class = ${player2.character.class == 0 ? 'Warrior' : player2.character.class == 1 ? 'Healer' : 'Archer'}
+                healthPoints = ${player2.character.healthPoints};
+                energy = ${player2.character.energy};
+                damage = ${player2.character.damage};
+                strength = ${player2.character.strength};
+                wisdom = ${player2.character.wisdom};
+                agility = ${player2.character.agility};
+                `}
+              </pre>
+            </div>
+            <div className='archer'>
+              <pre>
+                {`
+                Player 3
+                Class = ${player3.character.class == 0 ? 'Warrior' : player3.character.class == 1 ? 'Healer' : 'Archer'}
+                healthPoints = ${player3.character.healthPoints};
+                energy = ${player3.character.energy};
+                damage = ${player3.character.damage};
+                strength = ${player3.character.strength};
+                wisdom = ${player3.character.wisdom};
+                agility = ${player3.character.agility};
+                `}
+              </pre>
+          </div>
+        </div>
           <label>
-            Enemy Status:
-            Health: {enemyHealth}
-            Damage: {enemyDamage}
+            <span>Enemy Status:</span><br />
+            <span>Health: {enemyHealth}</span><br />
+            <span>Damage: {enemyDamage}</span><br />
           </label>
           <label>
           Value 1:
@@ -314,9 +427,23 @@ function App() {
           <button onClick={healPlayer}>Confirm Heal Action</button>
 
         </div>
-
       }
-
+      { stage == 3 && 
+        <div>
+        <h1>
+          Game is Finished! Players have Won!
+        </h1>
+        
+        </div>
+      }
+      { stage == 4 && 
+        <div>
+        <h1>
+          Game is Over! Enemy have Won!
+        </h1>
+        
+        </div>
+      }
       
 
     </div>
