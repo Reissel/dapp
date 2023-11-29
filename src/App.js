@@ -92,9 +92,13 @@ function App() {
         const damage = parseInt(damageInput, 10);
         const transaction = await contract.createEnemy(healthpoints, damage);
         await transaction.wait();
-        console.log('Finished Enemy Creation');
+
+        const filter = contract.filters.NewEnemyCreated();
+        const events = await contract.queryFilter(filter, transaction.blockNumber);
+
+        console.log('Events: ', events[0].fragment.name);
       } catch (error) {
-        console.log('Error: ', error);
+        alert(error.info.error.data.data.reason);
       }
 
       setHealthpoints('');
@@ -114,9 +118,13 @@ function App() {
         const playerClass = parseInt(classInput, 10);
         const transaction = await contract.createCharacter(playerClass);
         await transaction.wait();
-        console.log('Finished Character Creation');
+
+        const filter = contract.filters.NewPlayerCreated();
+        const events = await contract.queryFilter(filter, transaction.blockNumber);
+
+        console.log('Events: ', events[0].fragment.name);
       } catch (error) {
-        console.log('Error: ', error);
+        alert(error.info.error.data.data.reason);
       }
       setClassInput('')
 
@@ -136,7 +144,7 @@ function App() {
         await transaction.wait();
         console.log('Finished Attack');
       } catch (error) {
-        console.log('Error: ', error);
+        alert(error.info.error.data.data.reason);
       }
       setPlayerPublicKey('');
 
@@ -153,9 +161,15 @@ function App() {
       try {
         const transaction = await contract.attackEnemy();
         await transaction.wait();
-        console.log('Finished Attack to Enemy');
+
+        const filter = contract.filters.EnemyDefeated();
+        const events = await contract.queryFilter(filter, transaction.blockNumber);
+        
+        if(events)
+          console.log('Events: ', events[0].fragment.name);
+
       } catch (error) {
-        console.log('Error: ', error);
+        alert(error.info.error.data.data.reason);
       }
       setPlayerPublicKey('');
 
@@ -175,7 +189,7 @@ function App() {
         await transaction.wait();
         console.log('Finished Heal Player');
       } catch (error) {
-        console.log('Error: ', error);
+        alert(error.info.error.data.data.reason);
       }
       setPlayerPublicKey('');
 
