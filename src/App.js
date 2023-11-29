@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Game from "./artifacts/contracts/Game.sol/Game.json";
 
-const gameAddress = "{contract_deploy_address}";
+const gameAddress = "0xEB53b980B6f052016022956f3598D83b297BfCEf";
 
 function App() {
 
@@ -161,11 +161,10 @@ function App() {
       try {
         const transaction = await contract.attackEnemy();
         await transaction.wait();
-
         const filter = contract.filters.EnemyDefeated();
         const events = await contract.queryFilter(filter, transaction.blockNumber);
         
-        if(events)
+        if(events.length != 0)
           console.log('Events: ', events[0].fragment.name);
 
       } catch (error) {
