@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Game from "./artifacts/contracts/Game.sol/Game.json";
 
-const gameAddress = "0x3Dd3eB3fD566c5825B1045bC3F355547dA8c2269";
+const gameAddress = "{contract_deploy_address}";
 
 function App() {
 
