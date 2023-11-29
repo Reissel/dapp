@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Game from "./artifacts/contracts/Game.sol/Game.json";
 
-const gameAddress = "0xEB53b980B6f052016022956f3598D83b297BfCEf";
+const gameAddress = "{contract_address}";
 
 function App() {
 
@@ -83,6 +83,11 @@ function App() {
 
   async function createEnemy() {
 
+    if(!healthpointsInput || !damageInput) {
+      alert('Invalid input!');
+      return;
+    }
+
     if (typeof window.ethereum !== 'undefined') {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -110,6 +115,11 @@ function App() {
 
   async function createCharacter() {
 
+    if(!classInput) {
+      alert('Invalid input!');
+      return;
+    }
+
     if (typeof window.ethereum !== 'undefined') {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -133,6 +143,11 @@ function App() {
   }
 
   async function attackPlayer() {
+
+    if(!playerPublicKey) {
+      alert('Invalid input!');
+      return;
+    }
 
     if (typeof window.ethereum !== 'undefined') {
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -177,6 +192,11 @@ function App() {
   }
 
   async function healPlayer() {
+
+    if(!playerPublicKey) {
+      alert('Invalid input!');
+      return;
+    }
 
     if (typeof window.ethereum !== 'undefined') {
       const provider = new ethers.BrowserProvider(window.ethereum);
